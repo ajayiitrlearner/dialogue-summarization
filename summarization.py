@@ -1,21 +1,27 @@
 import streamlit as st
 import PyPDF2
 from docx import Document
-import openai
+import requests
 import pandas as pd
 from io import BytesIO
 
-# OpenAI API key (set your API key here)
-openai.api_key = 'your_openai_api_key'
+# Groq LLaMA-3 API key (set your API key here)
+GROQ_API_KEY = 'your_groq_llama3_api_key'
+GROQ_API_URL = 'https://api.groq.ai/llama3/generate'  # Update with the actual API URL if different
 
-# Function to generate summary using OpenAI
+# Function to generate summary using Groq LLaMA-3
 def generate_summary(text):
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=f"Summarize the following text:\n\n{text}",
-        max_tokens=150
-    )
-    summary = response.choices[0].text.strip()
+    headers = {
+        'Authorization': f'Bearer {GROQ_API_KEY}',
+        'Content-Type': 'application/json',
+    }
+    data = {
+        'prompt': f"Summarize the following text:\n\n{text}",
+        'max_tokens': 150,
+    }
+    response = requests.post(GROQ_API_URL, headers=headers, json=data)
+    response.raise_for_status()
+    summary = response.json()['choices'][0]['text'].strip()
     return summary
 
 # Function to process PDF files
